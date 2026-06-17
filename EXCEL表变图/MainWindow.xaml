@@ -1,0 +1,86 @@
+﻿<Window x:Class="EXCEL表变图.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EXCEL表变图"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid  Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 第一行：文件选择区域 -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0 0 0 15">
+            <Button x:Name="BtnSelectExcel" Content="选择Excel文件" Width="160" Height="38" 
+                    Click="BtnSelectExcel_Click" Background="#0078D4" Foreground="White" FontSize="14" FontWeight="Medium"/>
+            <TextBlock x:Name="TxtFilePath" Margin="15 0" VerticalAlignment="Center" FontSize="13" Foreground="#333" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- 第二行：列配置区域 -->
+        <Grid Grid.Row="1" Margin="0 0 0 15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="Auto" MinWidth="15"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="Auto" MinWidth="15"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sheet选择 -->
+            <TextBlock Grid.Column="0" Text="工作表：" VerticalAlignment="Center" FontSize="13"/>
+            <ComboBox x:Name="CboSheetList" Grid.Column="1" Height="30" IsEnabled="False" SelectionChanged="CboSheetList_SelectionChanged"/>
+
+            <!-- X轴时间列选择 -->
+            <TextBlock Grid.Column="3" Text="X轴(时间列)：" VerticalAlignment="Center" FontSize="13"/>
+            <ComboBox x:Name="CboXAxisColumn" Grid.Column="4" Height="30" IsEnabled="False"/>
+
+            <!-- Y轴数值列选择 -->
+            <TextBlock Grid.Column="6" Text="Y轴(数值列)：" VerticalAlignment="Center" FontSize="13"/>
+            <ComboBox x:Name="CboYAxisColumn" Grid.Column="7" Height="30" IsEnabled="False"/>
+
+            <!-- 生成图表按钮 -->
+            <Button x:Name="BtnGenerateChart" Grid.Column="9" Content="生成图表" Width="160" Height="38" 
+                    Click="BtnGenerateChart_Click" IsEnabled="False" Background="#2E7D32" Foreground="White" FontSize="14" FontWeight="Medium"/>
+        </Grid>
+
+        <!-- 第三行：数据预览表格 -->
+        <DataGrid Grid.Row="2" x:Name="DgDataPreview" Margin="0 0 0 15" 
+                  IsReadOnly="True" AutoGenerateColumns="True" 
+                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                  AlternatingRowBackground="#F5F5F5" HeadersVisibility="Column"/>
+
+        <!-- 第四行：图表区域 -->
+        <lvc:CartesianChart Grid.Row="3" x:Name="ChartMain" LegendLocation="Top" Margin="0" DisableAnimations="True">
+            <lvc:CartesianChart.Series>
+                <lvc:LineSeries Title="{Binding ChartTitle}" 
+                                Values="{Binding YAxisValues}" 
+                                LineSmoothness="0.7" 
+                                Stroke="#0078D4" 
+                                Fill="#1A0078D4"
+                                PointGeometrySize="4"
+                                StrokeThickness="2"/>
+            </lvc:CartesianChart.Series>
+            <lvc:CartesianChart.AxisX>
+                <!-- 移除MinValue/MaxValue绑定，启动不再区间为0；增加标签旋转 -->
+                <lvc:Axis Title="{Binding XAxisTitle}" Labels="{Binding XAxisLabels}" 
+                           FontSize="11" FontWeight="Medium"/>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis Title="{Binding YAxisTitle}" MinValue="0" 
+                          FontSize="11" FontWeight="Medium"/>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
+
+    </Grid>
+</Window>
