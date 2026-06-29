@@ -1,6 +1,7 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,6 +14,25 @@ using System.Windows.Shapes;
 
 namespace MQTT客户端
 {
+
+    // 单条采集数据子对象
+    public class MeterItem
+    {
+        public int scale { get; set; }
+        public int raw { get; set; }
+        public int addr { get; set; }
+        public double real { get; set; }
+    }
+
+    // 根JSON对象
+    public class MeterDataRoot
+    {
+        public MeterItem Ua { get; set; }
+        public MeterItem Cabinet_Current_A { get; set; }
+        public MeterItem Phase_A_Active_Power { get; set; }
+        public MeterItem Sys_Freq_Ua { get; set; }
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -104,12 +124,41 @@ namespace MQTT客户端
             }
         }
 
-        private Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs args)
+        private async  Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs args)
         {
             var topic = args.ApplicationMessage.Topic;
             var payload = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
             Log($"📥 收到 [{topic}]：{payload}");
-            return Task.CompletedTask;
+
+
+            try
+            {
+                // 1. 反序列化JSON
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var meterData = JsonSerializer.Deserialize<MeterDataRoot>(payload, options);
+
+                if (meterData == null)
+                {
+                    Log("❌ JSON解析为空，丢弃本条数据");
+                    return ;
+                }
+
+                // 2. 异步写入数据库（不阻塞MQTT消息循环）
+                await DbHelper.InsertMeterDataAsync(topic, meterData);
+                Log("✅ 数据入库成功");
+
+                //Log($"📥 收到 [{topic}]：{meterData}");
+
+            }
+            catch (JsonException jsonEx)
+            {
+                Log($"❌ JSON格式解析失败：{jsonEx.Message}");
+            }
+            catch (Exception dbEx)
+            {
+                Log($"❌ 数据库写入异常：{dbEx.Message}");
+            }
+            
         }
 
     }
