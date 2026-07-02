@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "configId": "STMicroelectronics:stm32:GenF1",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "type": "cortex-debug",
+      "executable": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\arduino\\sketches\\1FB7F93D74F75453\\sketch_jun30b.ino.elf",
+      "toolchainPrefix": "arm-none-eabi",
+      "svdFile": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\arduino\\sketches\\1FB7F93D74F75453\\STM32F103.svd",
+      "name": "Generic STM32F1 series",
+      "serverpath": "C:\\Users\\Administrator\\AppData\\Local\\Arduino15\\packages\\STMicroelectronics\\tools\\xpack-openocd\\0.12.0-2\\bin\\openocd.exe",
+      "servertype": "openocd",
+      "armToolchainPath": "C:\\Users\\Administrator\\AppData\\Local\\Arduino15\\packages\\STMicroelectronics\\tools\\xpack-arm-none-eabi-gcc\\12.3.1-1.2\\bin",
+      "configFiles": [
+        "interface/jlink.cfg",
+        "transport/select/swd.cfg",
+        "target/stm32f1x.cfg"
+      ]
+    }
+  ]
+}
