@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LIUNXMQTT", "LIUNXMQTT\LIUN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeterApi", "MeterApi\MeterApi.csproj", "{F997636D-1199-7658-1840-65262197752D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "学习一下", "学习一下\学习一下.csproj", "{EB636CF3-2BDF-C2FA-E89C-428550FCE7AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{F997636D-1199-7658-1840-65262197752D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F997636D-1199-7658-1840-65262197752D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F997636D-1199-7658-1840-65262197752D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB636CF3-2BDF-C2FA-E89C-428550FCE7AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB636CF3-2BDF-C2FA-E89C-428550FCE7AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB636CF3-2BDF-C2FA-E89C-428550FCE7AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB636CF3-2BDF-C2FA-E89C-428550FCE7AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
