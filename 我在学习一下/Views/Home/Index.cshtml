@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    // 若未在 _ViewStart.cshtml 中设置默认布局，需显式指定
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- 首页横幅 -->
+    <div class="bg-primary text-white p-5 rounded mb-4">
+        <h2>欢迎使用系统</h2>
+        <p class="mt-2">实时监控设备状态 · 智能分析运行数据 · 及时响应异常报警</p>
+    </div>
+
+    <!-- 功能入口卡片 -->
+    <div class="row gap-4">
+        <!-- 设备管理入口 -->
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa fa-microchip text-primary display-4 mb-3"></i>
+                    <h5 class="card-title">设备管理</h5>
+                    <p class="card-text">管理设备组与设备基本信息</p>
+                    <a href="/Devices" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据查询入口 -->
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa fa-line-chart text-success display-4 mb-3"></i>
+                    <h5 class="card-title">数据查询</h5>
+                    <p class="card-text">查看设备运行数据与趋势图表</p>
+                    <a href="/ParameterDatas" class="btn btn-success">查询数据</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 报警中心入口 -->
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa fa-bell text-danger display-4 mb-3"></i>
+                    <h5 class="card-title">报警中心</h5>
+                    <p class="card-text">处理设备异常报警信息</p>
+                    <a href="/AlarmDatas" class="btn btn-danger">查看报警</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 参数配置入口 -->
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fa fa-sliders text-info display-4 mb-3"></i>
+                    <h5 class="card-title">参数配置</h5>
+                    <p class="card-text">配置设备运行参数与阈值</p>
+                    <a href="/DeviceParameters" class="btn btn-info">配置参数</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

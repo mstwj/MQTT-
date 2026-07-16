@@ -1,0 +1,748 @@
+@charset "utf-8";
+/* CSS Document */
+*{
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box}
+*,body{padding:0px;	margin:0px;font-family: "微软雅黑";}
+body{color:#fff;font-size: 16px; background: #033c76;}
+li{ list-style-type:none;}
+table{}
+i{ margin:0px; padding:0px; text-indent:0px;}
+img{ border:none; max-width: 100%;}
+a{ text-decoration:none; color:#fff;}
+a.active,a:focus{ outline:none!important; text-decoration:none;}
+ol,ul,p,h1,h2,h3,h4,h5,h6{ padding:0; margin:0}
+a:hover{ color:#06c; text-decoration: none!important}
+.clearfix:after, .clearfix:before {
+	display: table;
+	content: " "
+}
+ .clearfix:after {
+	clear: both
+}
+.pulll_left{float:left;}
+.pulll_right{float:right;}
+i{font-style: normal;}
+.head{position: relative; height: 90px; margin: 0 15px; }
+.head h1{  position: absolute; left: 50%; transform: translateX(-50%); font-size: 30px; line-height: 90px; color: #daf9ff;}
+.head .home{position: absolute; left: 0; line-height: 90px;}
+.head .time{position: absolute; right: 0; line-height: 90px;}
+
+.head .menu li a:hover{ color: #f4e925;}
+.menu li a:hover:before,
+.menu li a:hover:after,
+.menu li:hover:before,
+.menu li:hover:after{border-color:  #f4e925; opacity: 1;}
+
+.mainbox{padding: 0px 10px;}
+.nav1{margin-left: -6px; margin-right:-6px;}
+.nav1>li{padding:0 6px; float: left;}
+
+.box{ border:1px solid rgba(7,118,181,.7); box-shadow:inset 0 0 5px rgba(7,118,181,.8); margin-bottom: 0px; position: relative;}
+.tit{ padding: 10px 10px 10px 25px;border-bottom:1px solid rgba(7,118,181,.7);font-size: 16px; font-weight: 500; position: relative;}
+.tit:before,.tit01:before{position: absolute; content: ""; width: 6px; height: 6px; background: rgba(22,214,255,.9);box-shadow: 0 0 5px rgba(22,214,255,.9); border-radius: 10px; left: 10px; top: 18px;}
+
+.tit:after,.box:before{ width: 100%; height: 1px; content: ""; position: absolute; left: 0; bottom:-1px; background:linear-gradient(to right,#076ead,#4ba6e0,#076ead); box-shadow: 0 0 5px rgba(131,189,227,1);}
+.box:before{top: -1px;}
+
+.boxnav{padding: 10px;}
+.nav2{}
+.nav2 li:first-child{border:none;}
+.nav2 li{float: left;border-left:1px solid rgba(7,118,181,.2); height:240px; padding: 0 10px 10px 10px;}
+.tit01{font-size: 16px; font-weight: 500; position: relative; padding-left: 15px;}
+.tit01:before{ left: 3px; top: 8px;}
+
+.ftechart{height: 200px;;}
+
+
+@font-face{font-family:electronicFont;src:url(../font/DS-DIGIT.TTF)}
+
+.table1 th{ border-bottom: 1px solid #407abd; font-size: 14px; text-align: center; padding: 6px 0; color: rgba(255,255,255,.8)}
+.table1 td{ border-bottom: 1px dotted#407abd;font-size: 12px; padding:6px 0;text-align: center; color: rgba(255,255,255,.6)}
+.table1 tr:last-child td{border: none;}
+.mapc{background: url(../images/bg3.png) no-repeat center center; background-size: 100% 100%}
+.map{position: relative; height: 100%; padding-top:100px;}
+.map img{}
+
+.mapnav{position: absolute; z-index: 100; left: 103px; bottom: 10px;}
+.mapnav div{ background: url(../images/bg1.png) no-repeat; background-size:100% auto;  width: 150px;text-align: center; padding: 15px 0; line-height: 120%;}
+.mapnav div span{font-size: 14px; opacity: .6}
+.mapnav div p{font-size: 30px; color: #5ee6ff; text-shadow: 0 0 5px #5ee6ff; font-weight: bold; padding-top: 5px;;font-family: electronicFont;}
+.mapnav li{float: left; margin-right: 6px;}
+
+.swiper-container{width:100%;height:300px;margin-left:auto;margin-right:auto}
+.swiper-slide{background-size:cover;background-position:center}
+.gallery-top{height:100%;width:100%}
+.gallery-thumbs{height:0%;box-sizing:border-box;padding: 1px 0;}
+.gallery-thumbs .swiper-slide{height:100%;border: 2px solid #02366c}
+.gallery-thumbs .swiper-slide-thumb-active{ border: 2px solid #fff}
+
+.small-images-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 101;
+}
+
+.small-image {
+    position: absolute;
+    max-width: 200px;
+    max-height: 200px;
+    pointer-events: auto;
+    z-index: 102;
+}
+
+.small-image.img1 { top: 50px; left: auto; right: 40px;}
+.small-image.img2 { top: 50px; left: 40px;}
+.small-image.img3 { bottom: 80px; left: 40px; top: auto; right: auto;}
+.small-image.img4 { bottom: 80px; right: 40px; top: auto;}
+    .small-image.img5 {
+        animation: rotateClockwise 20s linear infinite;
+        top: -140px;
+        left: 90px;
+        position: relative; /* 改为相对定位，让数字能相对于它定位 */
+        z-index: 102;
+    }
+
+    .small-image.img10 {
+        bottom: 152px;
+        left: 364px;
+    }
+
+@keyframes rotateClockwise {
+    0% {
+        transform: translateX(-50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translateX(-50%) rotate(360deg);
+    }
+}
+
+.images-number {
+    position: absolute;
+    top: 140px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+/* 添加数字样式 */
+    .images-number .number {
+        position: absolute;
+        top: -60px;
+        left: 95px;
+        transform: translate(-50%, -50%);
+        font-family: electronicFont; /* 使用已定义的电子字体 */
+        font-size: 2vw; /* 数字大小可根据需要调整 */
+        /*color: #5ee6ff;*/ /* 与其他数据颜色保持一致 */
+        color: #00ff00;
+        font-size: 26px;
+        text-shadow: 0 0 5px #5ee6ff; /* 添加发光效果 */
+        z-index: 104; /* 确保在图片上方显示 */
+    }
+
+
+
+/* 移除原有的连接线定位样式 */
+.small-image.img6,
+.small-image.img7, 
+.small-image.img8,
+.small-image.img9 {
+    /* 移除原有的绝对定位 */
+    position: relative;
+    /* 移除原有的transform */
+    transform: none;
+    /* 设置合适的尺寸 */
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    /* 初始化为隐藏，通过JS控制显示 */
+    display: none;
+}
+
+/* 为连接线容器创建新的定位上下文 */
+.small-images-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 101;
+}
+
+/* 连接线容器 - 使用网格布局或相对定位 */
+.connection-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 101;
+}
+
+/* 移除原有的连接线固定定位样式 */
+.connection-line.line1,
+.connection-line.line2, 
+.connection-line.line3,
+.connection-line.line4
+{
+    /* 移除原有的固定定位 */
+    position: absolute;
+    pointer-events: none;
+    z-index: 101;
+}
+
+.connection-line {
+    position: absolute;
+    transform-origin: 0 0;
+    pointer-events: none;
+    display: none;
+}
+.connection-line img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+
+
+
+
+.gnlb {text-align: center;display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
+    align-items: center;    /* 居中对齐 */
+    height: 100%;            /* 占满整个盒子高度 */
+    padding: 0;
+gap: 4px;    }
+.gnlb li{position: relative; display: inline-block; width: 30%; border: 1px solid #3e6ec0; margin:6px 1%;
+}
+.gnlb li span{display:block; padding: 10px 0; text-align: center; font-size: 12px; color: rgba(255,255,255,.5);}
+.gnlb li span em{font-size: 20px; color: #FFDB6C; font-style: normal;font-family:electronicFont;}
+/*.gnlb li:before,
+.gnlb li:after{ position:absolute; width:10px; height:5px; content: "";  border-top: 2px solid #1a8bc2; top: -2px;border-radius: 2px;}
+.gnlb li:before,.gnlb li span:before{border-left: 2px solid #1a8bc2;left: -2px;}*/
+.gnlb li:after,.gnlb li span:after{border-right: 2px solid #1a8bc2; right: -2px;}
+.gnlb li span{ position:relative;}
+/*.gnlb li span:before,
+.gnlb li span:after{ position:absolute; width:10px; height:5px;  content: "";border-bottom: 2px solid #1a8bc2; bottom:-2px;border-radius: 2px;}
+*/
+.weather{display: flex; justify-content: space-between; padding: 0 30px; height: 100%; align-items: center;}
+.wt2{display: flex; align-items: center;}
+.wt2 p{ font-size: 32px; padding-left: 10px; line-height: 100%;}
+.wt2 p sup{ font-size: 14px;}
+
+.wt1 span{font-size: 12px;}
+.wt1 img{width: 36px;}
+.wt03 p{line-height: 140%; font-size: 14px;}
+
+.wt03 p span{ display: inline-block; width: 70px; text-align: right; opacity: .6;}
+
+
+/* 页脚样式 */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.footer-content p {
+    margin-bottom: 0.5rem;
+}
+
+footer.sticky-footer {
+    position: sticky;
+    bottom: 0;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+footer:hover {
+    opacity: 1;
+}
+
+
+
+/* 增强版连接线渐变流动效果 */
+.connection-svg line {
+    stroke: url(#lineGradient);
+    stroke-width: 3;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px #5ee6ff);
+    animation: flowWave 1.2s linear infinite;
+    opacity: 0.8;
+}
+
+/* 波浪流动动画 */
+@keyframes flowWave {
+    0% {
+        stroke-dashoffset: 0;
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        stroke-dashoffset: -25;
+        opacity: 0.6;
+    }
+}
+
+/* 增强发光效果 */
+@keyframes strongGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 3px #5ee6ff) drop-shadow(0 0 6px rgba(94, 230, 255, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 0 8px #5ee6ff) drop-shadow(0 0 16px rgba(94, 230, 255, 0.8));
+        stroke-width: 4;
+    }
+}
+
+.connection-svg line {
+    stroke-dasharray: 8, 0; /* 更长的实线段 */
+    animation: flowWave 1.2s linear infinite, strongGlow 2s ease-in-out infinite;
+}
+
+
+/* 扩散动画定义 */
+@keyframes scale {
+  0% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+
+
+
+
+.boxall{ border: 1px solid rgba(25,186,139,.17); padding:0 .3rem .3rem .3rem;  background: rgba(255,255,255,.04) url(../images/line.png); background-size: 100% auto; position: relative; margin-bottom: .3rem; z-index: 10;}
+.boxall:before,
+.boxall:after{ position:absolute; width: .1rem; height: .1rem; content: "";  border-top: 2px solid #02a6b5; top: 0;}
+.boxall:before,.boxfoot:before{border-left: 2px solid #02a6b5;left: 0;}
+.boxall:after,.boxfoot:after{border-right: 2px solid #02a6b5; right: 0;}
+.alltitle{ font-size:.24rem; color:#fff; text-align: center; line-height: .6rem; border-bottom:1px solid rgba(255,255,255,.2)}
+
+.cicle3 {
+    width: 40rem;
+    height: 20rem;
+    background: url(../images/circle.png) no-repeat center;
+    background-size: 100%;
+    position: absolute;
+    top: 20%;
+    left: 53%;
+    transform: translateY(-50%) rotateY(75deg);
+    transform-style: preserve-3d;
+    animation: rotate3 20s linear infinite;
+    z-index: 103;
+}
+
+@keyframes rotate3 {
+    0% {
+        transform: translateX(-50%) rotateX(75deg) rotateZ(0)
+    }
+
+    100% {
+        transform: translateX(-50%) rotateX(75deg) rotateZ(360deg)
+    }
+}
+
+
+/* 滚动列表样式 */
+.scroll-container {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.scroll-list {
+    position: absolute;
+    width: 100%;
+    animation: scrollUp 30s linear infinite;
+}
+
+.scroll-list li {
+    padding: 8px 0;
+    border-bottom: 1px dotted rgba(255,255,255,0.1);
+    font-size: 14px;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.8);
+}
+
+.scroll-list li:last-child {
+    border-bottom: none;
+}
+
+.scroll-list p {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 滚动动画 */
+@keyframes scrollUp {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-100%);
+    }
+}
+
+/* 鼠标悬停时暂停滚动 */
+.scroll-container:hover .scroll-list {
+    animation-play-state: paused;
+}
+
+/* 确保滚动平滑 */
+.scroll-list {
+    transition: transform 0.3s ease;
+}
+
+
+/*龙思域*/
+
+/* Mapnav 动态边框效果 */
+.mapnav li div {
+    position: relative;
+    background: url(../images/bg1.png) no-repeat;
+    background-size: 100% auto;
+    width: 150px;
+    text-align: center;
+    padding: 15px 0;
+    line-height: 120%;
+    border: 1px solid rgba(94, 230, 255, 0.3);
+    animation: borderGlow 3s ease-in-out infinite;
+}
+
+    /* 四角装饰效果 */
+    .mapnav li div:before,
+    .mapnav li div:after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #5ee6ff;
+        animation: cornerPulse 2s ease-in-out infinite;
+    }
+
+    .mapnav li div:before {
+        top: -2px;
+        left: -2px;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    .mapnav li div:after {
+        top: -2px;
+        right: -2px;
+        border-left: none;
+        border-bottom: none;
+    }
+
+    .mapnav li div span:before,
+    .mapnav li div span:after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #5ee6ff;
+        animation: cornerPulse 2s ease-in-out infinite;
+    }
+
+    .mapnav li div span:before {
+        bottom: -2px;
+        left: -2px;
+        border-right: none;
+        border-top: none;
+    }
+
+    .mapnav li div span:after {
+        bottom: -2px;
+        right: -2px;
+        border-left: none;
+        border-top: none;
+    }
+
+/* 边框发光动画 */
+@keyframes borderGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(94, 230, 255, 0.3), inset 0 0 5px rgba(94, 230, 255, 0.2);
+        border-color: rgba(94, 230, 255, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(94, 230, 255, 0.6), 0 0 25px rgba(94, 230, 255, 0.4), inset 0 0 10px rgba(94, 230, 255, 0.3);
+        border-color: rgba(94, 230, 255, 0.8);
+    }
+}
+
+/* 四角脉冲动画 */
+@keyframes cornerPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+        box-shadow: 0 0 8px #5ee6ff;
+    }
+}
+
+/* 添加浮动效果 */
+.mapnav li {
+    animation: floatNav 6s ease-in-out infinite;
+}
+
+    .mapnav li:nth-child(2) {
+        animation-delay: -1.5s;
+    }
+
+    .mapnav li:nth-child(3) {
+        animation-delay: -3s;
+    }
+
+    .mapnav li:nth-child(4) {
+        animation-delay: -4.5s;
+    }
+
+.mapnav ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    gap: 20px; /* 增加元素之间的间距 */
+}
+
+
+/* 修改滚动列表样式 - 单条滚动 */
+.scroll-container {
+    height: 150px; /* 单条高度 */
+    overflow: hidden;
+    position: relative;
+}
+
+.scroll-list {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+    .scroll-list li {
+        padding: 8px 0;
+        border-bottom: 1px dotted rgba(255,255,255,0.1);
+        font-size: 14px;
+        line-height: 1.4;
+        color: rgba(255,255,255,0.8);
+        height: 30px;
+        display: flex;
+        align-items: center;
+    }
+
+    .scroll-list p {
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        color: #fff;
+    }
+
+/* 修改动画关键帧，保持停顿并实现循环 */
+@keyframes singleScroll {
+    0% {
+        transform: translateY(0);
+    }
+
+    16.67% { /* 1/6 */
+        transform: translateY(0);
+    }
+
+    18.33% {
+        transform: translateY(-30px);
+    }
+
+    33.33% { /* 2/6 */
+        transform: translateY(-30px);
+    }
+
+    35% {
+        transform: translateY(-60px);
+    }
+
+    50% { /* 3/6 */
+        transform: translateY(-60px);
+    }
+
+    51.67% {
+        transform: translateY(-90px);
+    }
+
+    66.67% { /* 4/6 */
+        transform: translateY(-90px);
+    }
+
+    68.33% {
+        transform: translateY(-120px);
+    }
+
+    83.33% { /* 5/6 */
+        transform: translateY(-120px);
+    }
+
+    85% {
+        transform: translateY(-150px);
+    }
+
+    98% {
+        transform: translateY(-150px);
+    }
+    /* 修改终点位置，滚动到复制的第一个条目（原条目1） */
+    100% {
+        transform: translateY(-180px);
+    }
+}
+
+.scroll-list {
+    animation: singleScroll 15s ease-in-out infinite;
+}
+
+/* 鼠标悬停暂停动画 */
+.scroll-container:hover .scroll-list {
+    animation-play-state: paused;
+}
+
+
+.twjstyle {
+    position: absolute;
+    top: -95px;
+    left: -3px;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+
+
+/* ===== 滚动列表最终版 (JS驱动) ===== */
+
+/* 移除 .boxall 默认样式 */
+.boxall {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* 表头外部容器：用于居中 */
+.scroll-header-wrapper {
+    padding: 0 10px 8px 10px;
+    display: flex;
+    justify-content: center;
+}
+
+/* 表头实际容器 */
+.scroll-header {
+    display: flex;
+    width: 100%;
+    /* 宽度100%，由内部flex-basis控制 */
+    gap: 8px;
+}
+
+    /* 表头单元格样式：等宽 */
+    .scroll-header span {
+        flex: 1;
+        /* 关键：让三个方框等宽 */
+        padding: 6px 0;
+        text-align: center;
+        font-weight: bold;
+        color: #9acff9;
+        background-color: rgba(7, 118, 181, 0.2);
+        border: 1px solid rgba(7, 118, 181, 0.6);
+        border-radius: 3px;
+        box-shadow: inset 0 0 5px rgba(7, 118, 181, 0.5);
+    }
+
+/* 滚动区域容器 */
+.scroll-container {
+    height: calc(100% - 40px);
+    overflow: hidden;
+    position: relative;
+}
+
+/* 滚动列表 */
+.scroll-list {
+    position: absolute;
+    width: 100%;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    animation: scrollUp-final 40s linear infinite;
+}
+
+    /* 列表项 */
+    .scroll-list li {
+        display: flex;
+        /* 使用flex布局分栏 */
+        gap: 8px;
+        /* 与表头间距一致 */
+        padding: 8px 10px;
+        border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+        /* 关键：奇偶行变色，作用于整个 li */
+        .scroll-list li:nth-child(odd) {
+            color: #6caeff;
+        }
+
+        .scroll-list li:nth-child(even) {
+            color: #ffffff;
+        }
+
+        /* 列表项的每一列：等宽 */
+        .scroll-list li span {
+            flex: 1;
+            /* 关键：让三列数据等宽 */
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+/* 动画与悬停效果 */
+@keyframes scrollUp-final {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-50%);
+    }
+}
+
+.scroll-container:hover .scroll-list {
+    animation-play-state: paused;
+}

@@ -1,0 +1,548 @@
+﻿<!-- Views/Shared/_Layout.cshtml -->
+@{
+    
+}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"] - AiLoT智控节能智慧能源管理系统</title>
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/font-awesome.min.css" />
+    <script src="~/css/chart.umd.min.js"></script>
+
+    <style>
+        /* 全局滚动条样式 - 不滚动时隐藏 */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color 0.3s ease;
+        }
+        
+        html::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        html::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        html::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        
+        /* 滚动时显示滚动条 */
+        html.scrolling {
+            scrollbar-color: #c1c1c1 #f1f1f1;
+        }
+        
+        html.scrolling::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+        }
+        
+        html.scrolling::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 顶部导航基础样式 */
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+            gap: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: auto;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .header-title {
+            text-align: center;
+            flex: 1;
+        }
+
+            .header-title h1 {
+                margin-bottom: 0;
+                font-size: 1.5rem;
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 1rem 0;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            width: 240px;
+            position: fixed;
+            left: -240px;
+            z-index: 998;
+            top: 100px;
+        }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+        /* 唤醒按钮 - 始终可见的小按钮 */
+        .sidebar-wakeup {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 40px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            position: fixed;
+            left: 0;
+            top: 100px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+            .sidebar-wakeup:hover {
+                width: 25px;
+                background-color: #0056b3;
+            }
+
+            .sidebar-wakeup i {
+                transition: all 0.3s ease;
+            }
+
+        /* 提示工具样式 */
+        .sidebar-tooltip {
+            position: fixed;
+            left: 25px;
+            top: 120px;
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+            .sidebar-tooltip::before {
+                content: '';
+                position: absolute;
+                left: -5px;
+                top: 50%;
+                transform: translateY(-50%);
+                border-width: 5px 5px 5px 0;
+                border-style: solid;
+                border-color: transparent #333 transparent transparent;
+            }
+
+        .sidebar-wakeup:hover + .sidebar-tooltip {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* 菜单核心样式 */
+        .menu-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+            .menu-item .icon-wrap {
+                width: 1.25rem;
+                text-align: center;
+                margin-right: 0.5rem;
+            }
+
+            .menu-item:hover, .menu-item.active {
+                background-color: #007bff;
+                color: white;
+            }
+
+        /* 内容区样式 */
+        .content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            transition: margin-left 0.3s ease;
+            padding-top: 70px;
+            margin-left: 0;
+        }
+
+        .sidebar.show + .content {
+            margin-left: 240px;
+        }
+
+        /* 自定义图标 */
+        .icon-simulation {
+            font-family: "FontAwesome";
+            width: 1.25rem;
+            text-align: center;
+            margin-right: 0.5rem;
+            display: inline-block;
+        }
+
+            .icon-simulation::before {
+                content: "\f201";
+            }
+
+        .content-max-width {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 响应式调整 */
+        @@media (max-width: 767px) {
+            .header-top {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-title {
+                order: 1;
+            }
+
+            .user-info {
+                order: 2;
+                justify-content: center;
+            }
+
+            .header-title h1 {
+                font-size: 1.25rem;
+            }
+
+            .sidebar {
+                top: 140px;
+                height: calc(100vh - 140px);
+            }
+
+            .sidebar-wakeup {
+                top: 150px;
+            }
+
+            .sidebar-tooltip {
+                top: 150px;
+            }
+
+            .content {
+                padding-top: 160px;
+            }
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <div class="page-container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="header-top">
+                <div class="header-title">
+                    <h1>AiLoT智控节能智慧能源管理系统</h1>
+                </div>
+                <div class="user-info">
+                    <span class="navbar-text">
+                        当前登录：童文君
+                        <a href="/Home/Logout" class="btn btn-outline-danger btn-sm">登出</a>
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区：侧边栏 + 内容 -->
+        <div class="main-content d-flex">
+            <!-- 唤醒按钮 - 直接唤醒侧边栏 -->
+            <button class="sidebar-wakeup" id="sidebarWakeup">
+                <i class="fa fa-bars"></i>
+            </button>
+
+            <!-- 提示工具 -->
+            <div class="sidebar-tooltip">打开菜单栏</div>
+
+            <!-- 侧边栏 -->
+            <nav class="sidebar" id="sidebar">
+                <!-- 侧边栏内部关闭按钮 -->
+                <div style="text-align: right; padding: 0.5rem 1rem;">
+                    <button class="sidebar-toggle-inner" id="sidebarToggleInner" style="background: none; border: none; color: #007bff; cursor: pointer; font-size: 1.2rem;">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+
+                @{
+                    string currentController = ViewContext.RouteData.Values["Controller"]?.ToString() ?? "";
+                    string pfcController = ViewContext.RouteData.Values["Controller"]?.ToString() == "PfPfc" ? "PfPfc" : "PowerFactor";
+                }
+                <a href="/Dashboard1" class="menu-item @(currentController == "Dashboard" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-desktop"></i></span>
+                    电容系统数字化大屏
+                </a>
+                <a href="/DeviceGroups" class="menu-item @(currentController == "DeviceGroups" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-cubes"></i></span>
+                    设备组管理
+                </a>
+                <a href="/Devices" class="menu-item @(currentController == "Devices" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-microchip"></i></span>
+                    设备管理
+                </a>
+                <a href="/DeviceParameters" class="menu-item @(currentController == "DeviceParameters" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-sliders"></i></span>
+                    设备参数管理
+                </a>
+                <a href="/ParameterDatas" class="menu-item @(currentController == "ParameterDatas" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-line-chart"></i></span>
+                    设备运行数据查询
+                </a>
+                <a href="/AlarmDatas" class="menu-item @(currentController == "AlarmDatas" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell"></i></span>
+                    设备报警数据查询
+                </a>
+                <a href="/ReactivePowerCompensation" class="menu-item @(currentController == "ReactivePowerCompensation" ? "active" : "")">
+                    <span class="icon-simulation"></span>
+                    无功补偿仿真
+                </a>
+                <a href="/PowerFactor" class="menu-item @(currentController == pfcController ? "active" : "")">
+                    <span class="icon-simulation"></span>
+                    功率因数补偿前补偿后对比
+                </a>
+                <a href="/Home/CarbonStatistics?parameterName=碳结算值1" class="menu-item @(currentController == "CarbonStatistics1" ? "active" : "")">
+                    <span class="icon-simulation"></span>
+                    总和碳数据
+                </a>
+                <a href="/Home/CarbonStatistics?parameterName=系统三相视在功率" class="menu-item @(currentController == "CarbonStatistics2" ? "active" : "")">
+                    <span class="icon-simulation"></span>
+                    总和电量数据
+                </a>
+                <a href="/Home/CarbonStatistics?parameterName=系统三相无功功率" class="menu-item @(currentController == "CarbonStatistics3" ? "active" : "")">
+                    <span class="icon-simulation"></span>
+                    总节能
+                </a>
+                <a href="/ParameterDatas?selectedParameters=190|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,9999|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas13" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell-concierge"></i></span>
+                    电容温度保护机制
+                </a>
+                <a href="/ParameterDatas?selectedParameters=80|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,82|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas1" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-behance"></i></span>
+                    碳1
+                </a>
+                <a href="/ParameterDatas?selectedParameters=81|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,209|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas2" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell-concierge"></i></span>
+                    碳2
+                </a>
+                <a href="/ParameterDatas?selectedParameters=210|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,199|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas3" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell-o"></i></span>
+                    碳3
+                </a>
+                <a href="/ParameterDatas?selectedParameters=200|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,219|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas4" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell"></i></span>
+                    碳4
+                </a>
+                <a href="/ParameterDatas?selectedParameters=201|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,211|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas5" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell"></i></span>
+                    碳5
+                </a>
+                <a href="/ParameterDatas?selectedParameters=202|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,212|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas6" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell"></i></span>
+                    碳6
+                </a>
+                <a href="/ParameterDatas?selectedParameters=203|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,213|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas7" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell"></i></span>
+                    碳7
+                </a>
+                <a href="/ParameterDatas?selectedParameters=204|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,214|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas8" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell"></i></span>
+                    碳8
+                </a>
+                <a href="/ParameterDatas?selectedParameters=205|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,215|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas9" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-bell"></i></span>
+                    碳9
+                </a>
+                <a href="/ParameterDatas?selectedParameters=206|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,216|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas10" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-grin-beam"></i></span>
+                    碳10
+                </a>
+                <a href="/ParameterDatas?selectedParameters=207|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,217|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas11" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-rebel"></i></span>
+                    碳11
+                </a>
+                <a href="/ParameterDatas?selectedParameters=208|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB,218|澳門俾利喇購物廣場-智能电容-L2電壓|qmgL6v7CusB" class="menu-item @(currentController == "ParameterDatas12" ? "active" : "")">
+                    <span class="icon-wrap"><i class="fa fa-beat-fade"></i></span>
+                    碳12
+                </a>
+            </nav>
+
+            <!-- 右侧内容区 -->
+            <main class="content">
+                
+                    @RenderBody()
+                
+            </main>
+        </div>
+    </div>
+
+    <!-- 核心脚本 -->
+    <script src="~/css/jquery.min.js"></script>
+    <script src="~/css/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function () {
+            const sidebar = $("#sidebar");
+            const sidebarWakeup = $("#sidebarWakeup");
+            const sidebarToggleInner = $("#sidebarToggleInner");
+            const content = $(".content");
+
+            // 显示侧边栏
+            function showSidebar() {
+                sidebar.addClass("show");
+                sidebarWakeup.find("i").removeClass("fa-bars").addClass("fa-chevron-left");
+            }
+
+            // 隐藏侧边栏
+            function hideSidebar() {
+                sidebar.removeClass("show");
+                sidebarWakeup.find("i").removeClass("fa-chevron-left").addClass("fa-bars");
+            }
+
+            // 1. 点击唤醒按钮显示侧边栏
+            sidebarWakeup.on("click", function (e) {
+                e.stopPropagation();
+                const isShown = sidebar.hasClass("show");
+
+                if (isShown) {
+                    hideSidebar();
+                } else {
+                    showSidebar();
+                }
+            });
+
+            // 2. 点击内部关闭按钮隐藏侧边栏
+            sidebarToggleInner.on("click", function (e) {
+                e.stopPropagation();
+                hideSidebar();
+            });
+
+            // 3. 点击内容区隐藏侧边栏
+            content.on("click", function () {
+                if (sidebar.hasClass("show")) {
+                    hideSidebar();
+                }
+            });
+
+            // 4. 窗口缩放时保持侧边栏状态
+            $(window).resize(function () {
+                // 保持当前状态，不需要额外处理
+            });
+            
+            // 5. 滚动时隐藏/显示顶部导航栏，并控制滚动条显示
+            let lastScrollTop = 0;
+            let scrollTimer = null;
+            
+            // 处理滚动条显示/隐藏的函数
+            function handleScrollbarVisibility() {
+                // 添加scrolling类以显示滚动条
+                $('html').addClass('scrolling');
+                
+                // 清除之前的定时器
+                if (scrollTimer) {
+                    clearTimeout(scrollTimer);
+                }
+                
+                // 设置定时器，在停止滚动100ms后隐藏滚动条
+                scrollTimer = setTimeout(function() {
+                    $('html').removeClass('scrolling');
+                }, 100);
+            }
+            
+            $(window).scroll(function () {
+                const scrollTop = $(this).scrollTop();
+                const header = $("header.header");
+                
+                // 处理滚动条可见性
+                handleScrollbarVisibility();
+                
+                // 向上滚动时显示顶部导航栏
+                if (scrollTop < lastScrollTop) {
+                    header.css({
+                        transform: 'translateY(0)',
+                        transition: 'transform 0.3s ease'
+                    });
+                } else if (scrollTop > 50) {
+                    // 向下滚动且超过50px时隐藏顶部导航栏
+                    header.css({
+                        transform: 'translateY(-100%)',
+                        transition: 'transform 0.3s ease'
+                    });
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+            
+            // 页面加载完成后初始化状态
+            $(window).on('load', function() {
+                // 默认隐藏滚动条
+                $('html').removeClass('scrolling');
+                
+                // 默认隐藏顶部导航栏
+                const header = $("header.header");
+                header.css({
+                    transform: 'translateY(-100%)',
+                    transition: 'transform 0.3s ease'
+                });
+            });
+            
+            // 页面DOM加载完成后立即执行，确保初始状态正确
+            $(document).ready(function() {
+                // 默认隐藏滚动条
+                $('html').removeClass('scrolling');
+                
+                // 默认隐藏顶部导航栏
+                const header = $("header.header");
+                header.css({
+                    transform: 'translateY(-100%)',
+                    transition: 'transform 0.3s ease'
+                });
+            });
+        });
+    </script>
+    @RenderSection("Scripts", required: false)
+    <script src="~/css/jquery.validate.min.js"></script>
+    <script src="~/css/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

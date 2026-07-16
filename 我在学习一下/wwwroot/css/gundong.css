@@ -1,0 +1,85 @@
+.content .content-right .right-center {
+    width: 100%;
+    height: 3.2rem;
+    /*border: 1px solid gold;*/
+    margin-bottom: .2rem;
+}
+
+#FontScroll {
+    width: 100%;
+    height: 2.3rem;
+    overflow: hidden;
+    /*float: left;*/
+    margin-top: .1rem;
+    /*margin: 0 5%;*/
+    /*margin-left: 50px;*/
+    /*background: gold;*/
+}
+
+    #FontScroll ul li {
+        height: .32rem;
+        width: 100%;
+        color: #ffffff;
+        text-align: center;
+        line-height: .32rem;
+        /*border-bottom: 1px dashed #404040;*/
+        /*width:33.3%;*/
+        overflow: hidden;
+        font-size: 0.14rem;
+        border-bottom: 1px dashed #404040;
+        /*width:33.3%;*/
+        /*background: red;
+    margin: 0 2%;*/
+    }
+
+
+.fontInner span {
+    display: inline-block;
+    /*float: left;*/
+    /*height: 20px;*/
+    width: 31%;
+    color: #ffffff;
+    /*background: red;*/
+}
+
+    .fontInner span b {
+        display: inline-block;
+        width: .75rem;
+        height: .2rem;
+        /*border-radius: 0.03rem;*/
+        color: #ffffff;
+        line-height: .2rem;
+        font-size: .1rem;
+    }
+
+/*#FontScroll ul li:nth-child(1) .fontInner span b{
+    background: #EB6841
+
+}*/
+
+#FontScroll ul li:nth-child(1) .fontInner span b {
+    background: #FE4365
+}
+
+#FontScroll ul li:nth-child(2) .fontInner span b {
+    background: #3FB8AF
+}
+
+#FontScroll ul li:nth-child(3) .fontInner span b {
+    background: #83AF9B
+}
+
+#FontScroll ul li .fontInner span b {
+    background: #C8C8A9
+}
+
+/*#FontScroll ul li:nth-child(8n-4) .fontInner span b{ background: #20a8fe }
+#FontScroll ul li:nth-child(8n-3) .fontInner span b{ background: #EB6841 }
+#FontScroll ul li:nth-child(8n-2) .fontInner span b{ background: #3FB8AF }
+#FontScroll ul li:nth-child(8n-1) .fontInner span b{ background: #FE4365 }
+#FontScroll ul li:nth-child(8n-5) .fontInner span b{ background: #FC9D9A }
+#FontScroll ul li:nth-child(8n-6) .fontInner span b{ background: #EDC951 }
+#FontScroll ul li:nth-child(8n-7) .fontInner span b{ background: #C8C8A9 }
+#FontScroll ul li:nth-child(8n) .fontInner span b{ background: #83AF9B }
+#FontScroll ul li:first-child .fontInner span b{ background: #036564 }
+#FontScroll ul li:last-child .fontInner span b{ background: #3299BB }*/

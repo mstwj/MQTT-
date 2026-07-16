@@ -1,6 +1,0 @@
-@学习一下_HostAddress = http://localhost:5029
-
-GET {{学习一下_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
