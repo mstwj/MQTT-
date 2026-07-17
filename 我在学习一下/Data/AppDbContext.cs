@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using 我在学习一下.Models;
+using static 我在学习一下.Models.ElectricitySummary;
 
 namespace 我在学习一下.Data
 {
@@ -10,36 +12,47 @@ namespace 我在学习一下.Data
         {
         }
 
-        public IQueryable<ParameterData> GetParameterDataByTableName(string tableName)
-        {
-            // 利用 EF Core 的 FromSqlRaw 动态指定表名，返回 IQueryable
-            return Set<ParameterData>().FromSqlRaw($"SELECT * FROM `{tableName}`");
-        }
 
         // 设备组表
-        public DbSet<DeviceGroup> DeviceGroups { get; set; }
+        public DbSet<TwjTestTable> TwjTestTables { get; set; }
 
-        // 设备表
-        public DbSet<Device> Devices { get; set; }
+        public DbSet<TwjScore> TwjScores { get; set; }
 
-        // 设备参数表
-        public DbSet<DeviceParameter> DeviceParameters { get; set; }
+        public DbSet<v_twj_test_table_sort_age> v_twj_test_table_sort_age { get; set; }
 
-        // 设备参数数据表
-        public DbSet<ParameterData> ParameterDatas { get; set; }
-
-        // 设备报警数据表
-        public DbSet<v_electricity_beili> v_electricity_beili { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
+            // 成绩表 关联 人员表
+            modelBuilder.Entity<TwjScore>()
+                .HasOne(s => s.Person)
+                .WithMany(p => p.Scores)
+                .HasForeignKey(s => s.PersonId)
+                .HasPrincipalKey(p => p.Id);
+
+            //EF Core 在第一次创建数据库模型（Model）时自动执行，只会运行一次。
+            //配置实体关联：一对多、一对一、多对多（你现在用的就是一对多）
             // 设备与设备参数的关系：一对多
-            modelBuilder.Entity<DeviceParameter>()
-                .HasOne(p => p.Device) // 每个参数属于一个设备
-                .WithMany(d => d.Parameters) // 一个设备可以有多个参数（双向关联）
-                .HasForeignKey(p => p.DeviceCode) // 外键是DeviceParameter.DeviceCode
-                .HasPrincipalKey(d => d.DeviceCode);
+
+            // 关键配置：所有实体类对应的表名自动转为小写
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // 将实体类名（如 DeviceGroups）转为小写（如 devicegroups）
+                entityType.SetTableName(entityType.GetTableName().ToLower());
+
+                // 可选：同时将列名也转为小写（避免字段名大小写问题）
+                foreach (var property in entityType.GetProperties())
+                {
+                    string dbCol = Regex.Replace(property.Name, "(?<!^)([A-Z])", "_$1").ToLower();
+                    property.SetColumnName(dbCol);
+                }
+            }
+
+            // 保留你原本的其他配置（如种子数据、关系映射等）
+            base.OnModelCreating(modelBuilder);
+
         }
     }
 }

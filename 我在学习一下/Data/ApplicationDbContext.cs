@@ -10,22 +10,7 @@ namespace 我在学习一下.Data
         {
         }
 
-        // 设备组表
-        public DbSet<DeviceGroup> DeviceGroups { get; set; }
-
-        // 设备表
-        public DbSet<Device> Devices { get; set; }
-
-        // 设备参数表
-        public DbSet<DeviceParameter> DeviceParameters { get; set; }
-
-        // 设备参数数据表
-        public DbSet<ParameterData> parameterdatas_copy5 { get; set; }
-
-        // 设备报警数据表
-        public DbSet<AlarmData> AlarmDatas { get; set; }
-
-
+        public DbSet<TwjTestTable> TwjTestTables { get; set; }
 
     }
 }

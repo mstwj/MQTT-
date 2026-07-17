@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System;
 using 我在学习一下.Data;
 using 我在学习一下.Models;
+using static 我在学习一下.Models.ElectricitySummary;
 
 namespace 我在学习一下.Controllers
 {
@@ -22,6 +23,142 @@ namespace 我在学习一下.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+
+        public async Task<IActionResult> MyTest4()
+        {
+            try
+            {
+                // 查询所有人员，顺带加载每个人对应的全部成绩
+                var result = await _context.TwjTestTables
+                    // 关联一对多成绩表
+                    .Include(p => p.Scores)
+                    .ToListAsync();
+
+                var html = @"
+                    <!DOCTYPE html>
+                    <html lang='zh-CN'>
+                    <head></head>
+                    <body>
+                    <h2>北理电碳表 - 实时电气参数（全部字段）</h2>
+                    <div style='overflow-x:auto;'>
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>性别</th>
+                            <th>年纪</th>
+                        </tr>";
+                foreach (var item in result)
+                {
+                    html += $@"
+                    <tr>
+                        <td>{item.Id}</td>
+                        <td>{item.Name}</td>
+                        <td>{item.Sex}</td>
+                        <td>{item.Age}</td>
+                    </tr>";
+                }
+                    html += @"
+                    </table>
+                    </div>
+                </body>
+                </html>";
+
+                return Content(html, "text/html; charset=utf-8");
+            }
+            catch (Exception ex)
+            {
+                var errorHtml = $@"
+                <!DOCTYPE html>
+                <html>
+                <body style='color:red;font-size:16px;margin:20px;'>
+                    <h3>获取数据失败</h3>
+                    <p>错误：{ex.Message}</p>
+                    <p>时间：{DateTime.Now:yyyy-MM-dd HH:mm:ss}</p>
+                </body>
+                </html>";
+                return Content(errorHtml, "text/html; charset=utf-8");
+            }
+        }
+
+        public async Task<IActionResult> MyTest3()
+        {
+            try
+            {
+                // 查询所有人员，顺带加载每个人对应的全部成绩
+                var personWithAllScore = await _context.TwjTestTables
+                    // 关联一对多成绩表
+                    .Include(p => p.Scores)
+                    .ToListAsync();
+
+                // 直接返回JSON，前端能看到每个人嵌套的成绩数组
+                return Json(new
+                {
+                    code = 200,
+                    msg = "查询成功",
+                    data = personWithAllScore
+                });
+            }
+            catch (Exception ex)
+            {
+                // 捕获异常返回错误信息
+                Console.WriteLine($"查询人员成绩异常：{ex.Message}");
+                return Json(new
+                {
+                    code = 500,
+                    msg = "查询失败",
+                    error = ex.Message
+                });
+            }
+        }
+
+        public async Task<IActionResult> MyTest2()
+        {
+            try
+            {
+                // 空值兜底：确保返回的列表不为null（无数据时返回空列表）
+                var result = await _context.v_twj_test_table_sort_age.ToListAsync();
+
+                // 返回JSON结果
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                // 异常日志记录（建议替换为日志框架，如Serilog/NLog）
+                Console.WriteLine($"查询电表参数视图异常：{ex.Message}，堆栈：{ex.StackTrace}");
+
+                // 兜底返回500错误，保证前端接收结构完整
+                return StatusCode(500, new
+                {
+                    Error = "获取电表参数失败",
+                    Detail = ex.Message,
+                    Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")
+                });
+            }
+
+        }
+
+        public async Task<IActionResult> MyTest()
+        {
+            //已经把全部数据读到内存了，直接用列表方法：
+            var rawData = await _context.TwjTestTables
+                .OrderByDescending(m => m.Name)
+                .ToListAsync();
+
+            // 获取列表最后一条，空列表返回null
+            var lastItem = rawData.LastOrDefault();
+
+            // 赋值结果
+            var result = new
+            {
+                powerFactor = lastItem.Name,
+                ambientTemperature = lastItem.Sex,                
+            };
+
+            Response.ContentType = "application/json; charset=utf-8";
+            return Json(result);
+
         }
 
         public async Task<IActionResult> deviceStatus()
@@ -206,133 +343,5 @@ namespace 我在学习一下.Controllers
                 });
             }
         }
-
-
-        public async Task<IActionResult> v_electricity_beili()
-        {
-            try
-            {
-                // 直接查询视图
-                var meterParams = await _context.Set<v_electricity_beili>()
-                    .FromSqlRaw("SELECT * FROM v_electricity_beili ORDER BY `电表编号`")
-                    .ToListAsync();
-
-                var result = meterParams ?? new List<v_electricity_beili>();
-
-                // 返回 HTML 网页（自动刷新2秒 + 显示全部字段版）
-                var html = @"
-<!DOCTYPE html>
-<html lang='zh-CN'>
-<head>
-    <meta charset='UTF-8'>
-    <!-- 每2秒自动刷新页面 -->
-    <meta http-equiv='refresh' content='2'>
-    <title>北理电碳表实时数据</title>
-    <style>
-        body { font-family: Microsoft YaHei; margin:20px; }
-        table { width:100%; border-collapse:collapse; margin-top:10px; table-layout:fixed; }
-        th,td { border:1px solid #ccc; padding:6px 8px; text-align:center; font-size:12px; }
-        th { background:#0078d7; color:white; }
-        tr:nth-child(even) { background:#f5f5f5; }
-    </style>
-</head>
-<body>
-    <h2>北理电碳表 - 实时电气参数（全部字段）</h2>
-    <div style='overflow-x:auto;'>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>电表编号</th>
-            <th>最新更新时间</th>
-            <th>A相电压</th>
-            <th>B相电压</th>
-            <th>C相电压</th>
-            <th>AB线电压</th>
-            <th>BC线电压</th>
-            <th>CA线电压</th>
-            <th>A相电流</th>
-            <th>B相电流</th>
-            <th>C相电流</th>
-            <th>零线电流</th>
-            <th>A有功功率</th>
-            <th>B有功功率</th>
-            <th>C有功功率</th>
-            <th>总有功功率</th>
-            <th>A无功功率</th>
-            <th>B无功功率</th>
-            <th>C无功功率</th>
-            <th>总无功功率</th>
-            <th>A视在功率</th>
-            <th>B视在功率</th>
-            <th>C视在功率</th>
-            <th>总视在功率</th>
-            <th>A功率因数</th>
-            <th>B功率因数</th>
-            <th>C功率因数</th>
-            <th>总功率因数</th>
-            <th>功率方向</th>
-        </tr>";
-
-                foreach (var item in result)
-                {
-                    html += $@"
-        <tr>
-            <td>{item.ID}</td>
-            <td>{item.电表编号}</td>
-            <td>{item.最新更新时间?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-"}</td>
-            <td>{item.A相电压:#0.0000}</td>
-            <td>{item.B相电压:#0.0000}</td>
-            <td>{item.C相电压:#0.0000}</td>
-            <td>{item.AB线电压:#0.0000}</td>
-            <td>{item.BC线电压:#0.0000}</td>
-            <td>{item.CA线电压:#0.0000}</td>
-            <td>{item.A相电流:#0.0000}</td>
-            <td>{item.B相电流:#0.0000}</td>
-            <td>{item.C相电流:#0.0000}</td>
-            <td>{item.零线电流:#0.0000}</td>
-            <td>{item.A有功功率:#0.0000}</td>
-            <td>{item.B有功功率:#0.0000}</td>
-            <td>{item.C有功功率:#0.0000}</td>
-            <td>{item.总有功功率:#0.0000}</td>
-            <td>{item.A无功功率:#0.0000}</td>
-            <td>{item.B无功功率:#0.0000}</td>
-            <td>{item.C无功功率:#0.0000}</td>
-            <td>{item.总无功功率:#0.0000}</td>
-            <td>{item.A视在功率:#0.0000}</td>
-            <td>{item.B视在功率:#0.0000}</td>
-            <td>{item.C视在功率:#0.0000}</td>
-            <td>{item.总视在功率:#0.0000}</td>
-            <td>{item.A功率因数:#0.0000}</td>
-            <td>{item.B功率因数:#0.0000}</td>
-            <td>{item.C功率因数:#0.0000}</td>
-            <td>{item.总功率因数:#0.0000}</td>
-            <td>{item.功率方向:#0.0000}</td>
-        </tr>";
-                }
-
-                html += @"
-    </table>
-    </div>
-</body>
-</html>";
-
-                return Content(html, "text/html; charset=utf-8");
-            }
-            catch (Exception ex)
-            {
-                var errorHtml = $@"
-<!DOCTYPE html>
-<html>
-<body style='color:red;font-size:16px;margin:20px;'>
-    <h3>获取数据失败</h3>
-    <p>错误：{ex.Message}</p>
-    <p>时间：{DateTime.Now:yyyy-MM-dd HH:mm:ss}</p>
-</body>
-</html>";
-
-                return Content(errorHtml, "text/html; charset=utf-8");
-            }
-        }
-
     }
 }

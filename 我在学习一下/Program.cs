@@ -85,12 +85,16 @@ namespace 我在学习一下
 
 
             // 9. 数据库初始化
+            //CreateScope() 创建局部服务作用域
             using (var scope = app.Services.CreateScope())
             {
+                //拿到当前作用域下的服务提供者，用来获取注册好的服务
                 var services = scope.ServiceProvider;
                 try
                 {
                     var context = services.GetRequiredService<AppDbContext>();
+                    //如果数据库已经存在：直接跳过，不做任何修改
+                    //EnsureCreated：只建库建表，不执行迁移记录，适合小型 Demo、内存库
                     context.Database.EnsureCreated();
                 }
                 catch (Exception ex)
