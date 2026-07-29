@@ -1,0 +1,49 @@
+﻿<Window x:Class="GET_JSON.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GET_JSON"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 控制按钮区 -->
+        <StackPanel Orientation="Horizontal" >
+            <Button x:Name="btnStart" Content="启动从站" Width="110" Click="BtnStart_Click"/>
+            <Button x:Name="btnStop" Content="停止从站" Width="110" Click="BtnStop_Click" IsEnabled="False"/>
+            <TextBlock VerticalAlignment="Center">从站ID：</TextBlock>
+            <TextBox x:Name="txtSlaveId" Width="60" Text="1"/>
+            <TextBlock VerticalAlignment="Center">端口：</TextBlock>
+            <TextBox x:Name="txtPort" Width="60" Text="502"/>
+
+            <Button Content="发起GET请求" Width="160" Height="35" Click="BtnGet_Click" HorizontalAlignment="Left"/>
+            
+        </StackPanel>
+
+
+        <!-- 本地设置寄存器 -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12">
+            <TextBlock VerticalAlignment="Center">寄存器偏移地址：</TextBlock>
+            <TextBox x:Name="txtRegAddr" Width="70" Text="0"/>
+            <TextBlock VerticalAlignment="Center">值：</TextBlock>
+            <TextBox x:Name="txtRegValue" Width="70" Text="100"/>
+            <Button Content="写入保持寄存器" Click="BtnWriteLocalReg_Click"/>
+        </StackPanel>
+
+        <!-- 日志列表 -->
+        <ListBox Grid.Row="2" x:Name="lstLog" Margin="0,10"/>
+
+        <TextBlock Grid.Row="3" Margin="0,15,0,10" Text="返回JSON结果："/>
+        <TextBox   Grid.Row="4" x:Name="TextBox1" IsReadOnly="True" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" Margin="0,0,0,19" Grid.RowSpan="2"/>
+        
+    </Grid>
+</Window>

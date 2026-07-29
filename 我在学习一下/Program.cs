@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Serilog.Extensions.Logging;
 using 我在学习一下.Data;
 
 namespace 我在学习一下
@@ -9,6 +8,25 @@ namespace 我在学习一下
     {
         public static void Main(string[] args)
         {
+            //launchSettings.json 不是发布后生效的配置！
+            //它只在 Visual Studio 内部调试时使用，你双击发布后的 exe，这个文件直接被忽略，完全无效。
+
+
+            //appsettings.json【基础主配置】✅
+            //无论开发、正式发布双击 exe、服务器部署，永远加载。
+            //存放通用配置：数据库连接、Kestrel 端口、跨域、日志通用配置。
+            //发布后，修改这个文件就能生效！这就是你要用来配置端口的文件！
+            //appsettings.Development.json【开发环境专用】
+            //只有程序环境变量 ASPNETCORE_ENVIRONMENT = Development 时才会加载。
+            //也就是仅在 Visual Studio 里面点调试运行才生效；
+            //✖️ 你双击 exe 运行【生产环境】，这个文件直接被忽略，完全不读取！
+
+            // =====================【新增等待回车代码】=====================
+            Console.WriteLine("=============================================");
+            Console.WriteLine("服务初始化完成！按下回车键启动Web服务...");
+            Console.WriteLine("=============================================");
+            Console.ReadLine(); // 阻塞，等待用户输入回车
+
             var builder = WebApplication.CreateBuilder(args);
 
 
@@ -38,15 +56,8 @@ namespace 我在学习一下
 
             // 4. 数据库上下文（保留需要的，删除多余）
             builder.Services.AddDbContext<我在学习一下.Data.AppDbContext>(options =>
-                options.UseMySql(
-                    builder.Configuration.GetConnectionString("MySqlConnection"),
-                    new MySqlServerVersion(new Version(8, 0, 43))
-                ));
-            // 注册 MySQL 数据库上下文（关键步骤）
-            builder.Services.AddDbContext<我在学习一下.Data.ApplicationDbContext>(options =>
-                options.UseMySql(
-                    builder.Configuration.GetConnectionString("MySqlConnection"),
-                    new MySqlServerVersion(new Version(8, 0, 43)) // 替换为你的 MySQL 版本
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("SqlConnection")
                 ));
 
 
@@ -75,6 +86,9 @@ namespace 我在学习一下
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            // =====================【重点添加这一行！！】=====================
+            app.UseCors("AllowAllCors");
 
             app.UseAuthorization();
 

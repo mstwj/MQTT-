@@ -5,6 +5,7 @@ using static 我在学习一下.Models.ElectricitySummary;
 
 namespace 我在学习一下.Data
 {
+    //以下很多代码无法使用,因为阿炳的PC机器,有人使用了.. 我现在使用的是 工程机发送..
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -13,24 +14,13 @@ namespace 我在学习一下.Data
         }
 
 
-        // 设备组表
-        public DbSet<TwjTestTable> TwjTestTables { get; set; }
 
-        public DbSet<TwjScore> TwjScores { get; set; }
-
-        public DbSet<v_twj_test_table_sort_age> v_twj_test_table_sort_age { get; set; }
-
+        public DbSet<tw_kzq> twj_kzqs { get; set; }
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            // 成绩表 关联 人员表
-            modelBuilder.Entity<TwjScore>()
-                .HasOne(s => s.Person)
-                .WithMany(p => p.Scores)
-                .HasForeignKey(s => s.PersonId)
-                .HasPrincipalKey(p => p.Id);
 
             //EF Core 在第一次创建数据库模型（Model）时自动执行，只会运行一次。
             //配置实体关联：一对多、一对一、多对多（你现在用的就是一对多）

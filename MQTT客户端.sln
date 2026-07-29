@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "我在学习一下", "我�
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kzq_modbus", "Kzq_modbus\Kzq_modbus.csproj", "{32A4A67B-6EFD-4716-B320-6D6E79D73E26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GET-JSON", "GET-JSON\GET-JSON.csproj", "{8561C3DD-0824-4238-A7FC-1737A42BF755}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetModbusClient", "GetModbusClient\GetModbusClient.csproj", "{F2289D24-3F61-4D50-8816-0D42E854640E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{32A4A67B-6EFD-4716-B320-6D6E79D73E26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32A4A67B-6EFD-4716-B320-6D6E79D73E26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32A4A67B-6EFD-4716-B320-6D6E79D73E26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8561C3DD-0824-4238-A7FC-1737A42BF755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8561C3DD-0824-4238-A7FC-1737A42BF755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8561C3DD-0824-4238-A7FC-1737A42BF755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8561C3DD-0824-4238-A7FC-1737A42BF755}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2289D24-3F61-4D50-8816-0D42E854640E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2289D24-3F61-4D50-8816-0D42E854640E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2289D24-3F61-4D50-8816-0D42E854640E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2289D24-3F61-4D50-8816-0D42E854640E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
