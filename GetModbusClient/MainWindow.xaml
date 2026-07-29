@@ -7,6 +7,89 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <!-- 串口配置区域 -->
+        <GroupBox Header="串口参数" Grid.Row="0" Margin="0 0 0 8">
+            <StackPanel Orientation="Horizontal" Margin="5" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="COM口:" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cbbCom" Width="80" Margin="5 0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="波特率:" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cbbBaud" Width="90" Margin="5 0">
+                        <ComboBoxItem>9600</ComboBoxItem>
+                        <ComboBoxItem>19200</ComboBoxItem>
+                        <ComboBoxItem>38400</ComboBoxItem>
+                        <ComboBoxItem>115200</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="校验:" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cbbParity" Width="70" Margin="5 0">
+                        <ComboBoxItem>None</ComboBoxItem>
+                        <ComboBoxItem>Odd</ComboBoxItem>
+                        <ComboBoxItem>Even</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="数据位:" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cbbDataBit" Width="60" Margin="5 0">
+                        <ComboBoxItem>8</ComboBoxItem>
+                        <ComboBoxItem>7</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="停止位:" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cbbStopBit" Width="60" Margin="5 0">
+                        <ComboBoxItem>1</ComboBoxItem>
+                        <ComboBoxItem>2</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Modbus采集参数 -->
+        <GroupBox Header="采集配置" Grid.Row="1" Margin="0 0 0 8">
+            <StackPanel Orientation="Horizontal" Margin="5" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="从站ID:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtSlaveId" Width="50" Margin="5 0" Text="1"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="起始地址:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtStartAddr" Width="65" Margin="5 0" Text="0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="读取数量:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtReadLen" Width="65" Margin="5 0" Text="10"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="轮询间隔(ms):" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtInterval" Width="70" Margin="5 0" Text="500"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 控制按钮 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 0 0 8" >
+            <Button x:Name="btnStart" Content="启动采集" Width="110" Click="BtnStart_Click"/>
+            <Button x:Name="btnStop" Content="停止采集" Width="110" Click="BtnStop_Click" IsEnabled="False"/>
+            <Button x:Name="btnClearLog" Content="清空日志" Width="110" Click="BtnClearLog_Click"/>
+        </StackPanel>
+
+        <!-- 日志输出 -->
+        <GroupBox Header="运行日志" Grid.Row="3">
+            <TextBox x:Name="txtLog" IsReadOnly="True" Margin="5"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto"
+                     TextWrapping="Wrap"/>
+        </GroupBox>
     </Grid>
 </Window>
