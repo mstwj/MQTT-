@@ -247,15 +247,14 @@ namespace GetModbusClient
             if (_isRunning) return;
             try
             {
-                #region 读取界面参数【修复ComboBox转换BUG】
                 // COM口
-                var comItem = cbbCom.SelectedItem as ComboBoxItem;
-                if (comItem == null)
+                string comName = cbbCom.SelectedItem?.ToString();
+                if (string.IsNullOrWhiteSpace(comName))
                 {
                     AddLog("请选择COM端口");
                     return;
                 }
-                string comName = comItem.Content.ToString()!;
+                
 
                 // 波特率
                 var baudItem = cbbBaud.SelectedItem as ComboBoxItem;
@@ -443,4 +442,3 @@ namespace GetModbusClient
         }
     }
 }
-#endregion
