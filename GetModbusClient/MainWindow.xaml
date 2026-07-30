@@ -8,14 +8,18 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
+            
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
 
         <!-- 串口配置区域 -->
         <GroupBox Header="串口参数" Grid.Row="0" Margin="0 0 0 8">
+
             <StackPanel Orientation="Horizontal" Margin="5" >
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="COM口:" VerticalAlignment="Center"/>
@@ -82,8 +86,9 @@
             <Button x:Name="btnStart" Content="启动采集" Width="110" Click="BtnStart_Click"/>
             <Button x:Name="btnStop" Content="停止采集" Width="110" Click="BtnStop_Click" IsEnabled="False"/>
             <Button x:Name="btnClearLog" Content="清空日志" Width="110" Click="BtnClearLog_Click"/>
+            <Button Content="保存配置" Width="100" Click="BtnSaveConfig_Click"/>
         </StackPanel>
-
+        
         <!-- 日志输出 -->
         <GroupBox Header="运行日志" Grid.Row="3">
             <TextBox x:Name="txtLog" IsReadOnly="True" Margin="5"
@@ -91,5 +96,14 @@
                      HorizontalScrollBarVisibility="Auto"
                      TextWrapping="Wrap"/>
         </GroupBox>
+
+        <StackPanel Orientation="Horizontal" Margin="5" Grid.Row="4">
+            <TextBlock Text="服务端IP：" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtServerIp" Width="160" Margin="5,0" Text="127.0.0.1"/>
+            <TextBlock Text="端口：" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <TextBox x:Name="txtServerPort" Width="80" Margin="5,0" Text="8080"/>
+        </StackPanel>
+
+
     </Grid>
 </Window>
