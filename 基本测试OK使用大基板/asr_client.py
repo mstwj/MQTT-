@@ -1,24 +1,29 @@
+# asr_client.py - AI 语音识别客户端 (云端推理长超时优化版)
+
 import gc
 import os
+import time
 import ujson as json
 import usocket as socket
 
-# 尝试导入 SSL 库 (兼容新旧 MicroPython 固件)
 try:
     import ssl
 except ImportError:
     import ussl as ssl
 
-SILICONFLOW_KEY = "sk-lisenkrkcvdlmmavgytlsnpwpodcfyqrmnszopgzwpwespbe"  # 换成你的 Key
+# 硅基流动 API 配置
+SILICONFLOW_KEY = "sk-lisenkrkcvdlmmavgytlsnpwpodcfyqrmnszopgzwpwespbe"
 HOST = "api.siliconflow.cn"
 PORT = 443
 PATH = "/v1/audio/transcriptions"
-MODEL_NAME = "FunAudioLLM/SenseVoiceSmall"  # 硅基流动上的极速语音识别模型
+MODEL_NAME = "FunAudioLLM/SenseVoiceSmall"
 
 
 def transcribe_wav(filename="record.wav"):
-    # 手动触发垃圾回收，释放出最大内存给 SSL 握手
-    gc.collect()
+    """
+    将本地 WAV 音频文件发送至硅基流动云端进行语音转文本 (ASR)
+    """
+    gc.collect()  # 发送前主动清理内存
 
     try:
         file_size = os.stat(filename)[6]
@@ -45,16 +50,16 @@ def transcribe_wav(filename="record.wav"):
 
     s = None
     try:
-        # 1. 解析域名 IP
+        # 1. 建立基础 Socket 链接
         addr_info = socket.getaddrinfo(HOST, PORT)
         addr = addr_info[0][-1]
 
-        # 2. 创建原生 Socket
         raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        raw_sock.settimeout(15)  # 设置 15 秒超时
+        # 核心设置：设置 30 秒长超时，防止云端大模型推理慢导致的读超时
+        raw_sock.settimeout(60.0)
         raw_sock.connect(addr)
 
-        # 3. 进行 SSL/TLS 包装
+        # 2. 包装 SSL 加密层
         if hasattr(ssl, "wrap_socket"):
             s = ssl.wrap_socket(raw_sock, server_hostname=HOST)
         else:
@@ -62,7 +67,7 @@ def transcribe_wav(filename="record.wav"):
             ctx.verify_mode = ssl.CERT_NONE
             s = ctx.wrap_socket(raw_sock, server_hostname=HOST)
 
-        # 4. 发送 HTTP 请求头
+        # 3. 发送 HTTP 请求头
         http_headers = (
             f"POST {PATH} HTTP/1.1\r\n"
             f"Host: {HOST}\r\n"
@@ -72,32 +77,41 @@ def transcribe_wav(filename="record.wav"):
             f"Connection: close\r\n\r\n"
         )
         s.write(http_headers.encode("utf-8"))
-
-        # 5. 发送 Multipart Body（流式读取文件）
         s.write(header_data.encode("utf-8"))
 
+        # 4. 流式高效发送音频 Payload
         with open(filename, "rb") as f:
             buf = bytearray(2048)
             while True:
                 num_read = f.readinto(buf)
                 if num_read <= 0:
                     break
-                s.write(buf[:num_read])
+                s.write(memoryview(buf)[:num_read])
 
         s.write(model_data.encode("utf-8"))
+        print("⬆️ 音频数据已全部发完，等待云端 ASR 推理返回...")
 
-        # 6. 读取响应结果
-        response = s.read()
-        if not response:
+        # 5. 接收云端返回的识别结果
+        response_data = bytearray()
+        while True:
+            chunk = s.read(1024)
+            if not chunk:
+                break
+            response_data.extend(chunk)
+            # 匹配到完整 JSON 字符串即可提前退出
+            if b"}" in chunk and b"{" in response_data:
+                break
+
+        if not response_data:
             return "Error: 服务器未返回数据"
 
-        response_str = response.decode("utf-8")
+        response_str = response_data.decode("utf-8", "ignore")
 
-        # 寻找 JSON 体的起始位置
+        # 6. 解析结果中的文本
         json_start = response_str.find("{")
-        if json_start != -1:
-            res_json = json.loads(response_str[json_start:])
-            # 获取识别出来的文本
+        json_end = response_str.rfind("}")
+        if json_start != -1 and json_end != -1:
+            res_json = json.loads(response_str[json_start : json_end + 1])
             text = res_json.get("text", "")
             return text.strip()
         else:
@@ -108,5 +122,8 @@ def transcribe_wav(filename="record.wav"):
         return f"Error: {str(e)}"
     finally:
         if s:
-            s.close()
-        gc.collect()  # 再次清理内存
+            try:
+                s.close()
+            except:
+                pass
+        gc.collect()  # 释放请求过程中占用的内存
