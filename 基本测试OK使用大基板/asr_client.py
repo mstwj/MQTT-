@@ -16,7 +16,7 @@ SILICONFLOW_KEY = "sk-lisenkrkcvdlmmavgytlsnpwpodcfyqrmnszopgzwpwespbe"
 HOST = "api.siliconflow.cn"
 PORT = 443
 PATH = "/v1/audio/transcriptions"
-MODEL_NAME = "FunAudioLLM/SenseVoiceSmall"
+MODEL_NAME = "TeleAI/TeleSpeechASR"
 
 
 def transcribe_wav(filename="record.wav"):

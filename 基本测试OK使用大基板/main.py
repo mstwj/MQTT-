@@ -1,4 +1,4 @@
-# main.py - AI 语音助手主流程 (含真实网速诊断与 SSL 超时修复)
+# main.py - AI 语音助手主流程 (声文同步与网络诊断优化版)
 
 import gc
 import time
@@ -229,13 +229,21 @@ while True:
                         ai_reply = chat_ask(user_text)
                         print(f"💡 AI 回答: {ai_reply}")
 
-                        refresh_ui("AI 回复", ai_reply, color=0xFFFF)
-
                         if ai_reply and not ai_reply.startswith("HTTP") and not ai_reply.startswith("Error"):
+                            # 1. 不立刻爆出文本，界面提示生成语音，保持思考状态
+                            refresh_ui("AI 思考中", f"我：{user_text}\n\n正在合成语音...", color=0xFFE0)
+                            
+                            # 2. 生成 TTS 音频文件
                             tts_success = text_to_speech(ai_reply, filename="tts_output.wav")
+                            
                             if tts_success:
-                                print("🔊 正在播放语音回答...")
+                                # 3. 声文对齐关键点：语音文件就绪，播放瞬间同步刷新屏幕显示完整文本
+                                print("🔊 声文同步：播放语音并展示文字...")
+                                refresh_ui("AI 回复", ai_reply, color=0xFFFF)
                                 player.play_wav("tts_output.wav")
+                            else:
+                                # 若 TTS 合成失败，退化为仅文本展示
+                                refresh_ui("AI 回复", ai_reply, color=0xFFFF)
                         else:
                             print("⚠️ AI 返回异常文本，跳过 TTS 播报")
                     else:

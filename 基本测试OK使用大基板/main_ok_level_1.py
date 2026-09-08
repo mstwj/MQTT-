@@ -1,145 +1,272 @@
-# main.py - 封装后的极简 AI 语音助手主流程
+# main.py - AI 语音助手主流程 (含真实网速诊断与 SSL 超时修复)
 
+import gc
 import time
 from machine import Pin
+import network
+import usocket as socket
 
-from wifi_manager import (
-    load_wifi_config,
-    connect_router_wifi,
-    start_ap_web_server,
-    is_sta_connected,
-)
-from audio_recorder import AudioRecorder
-from asr_client import transcribe_wav
+# 脱机上电硬件救急：强行拉高背光和 CS 引脚
+try:
+    Pin(13, Pin.OUT).value(1)  # 背光引脚 Pin 13
+    Pin(14, Pin.OUT).value(1)  # CS 引脚 Pin 14
+    time.sleep_ms(100)
+except:
+    pass
+
+from display_ui import UIManager  # 导入 UI 模块
+
+# 1. 初始化 UI 管理器
+ui = UIManager()
+ui.render(title="系统启动中", content="正在初始化硬件与网络...", color=0xFFFF)
+
 from ai_client import chat_ask
-from tts_client import text_to_speech
+from asr_client import transcribe_wav
 from audio_play import AudioPlayer
-from display_ui import UIManager  # 导入全新的 UI 模块
+from audio_recorder import AudioRecorder
+from tts_client import text_to_speech
+from wifi_manager import (
+    connect_router_wifi,
+    is_sta_connected,
+    load_wifi_config,
+    start_ap_web_server,
+)
 
 # ==========================================
 # 1. 初始化 硬件、UI 与 全局对象
 # ==========================================
-# ---------------- 1. 硬件引脚配置 ----------------
-I2S_WS = 4   # IO4_WS (麦克风)
-I2S_SCK = 5  # IO5_SCK (麦克风)
-I2S_SD = 6   # IO6_SD (麦克风)
-BOOT_PIN = 0  # ESP32-S3 板载 Boot 键固定为 GPIO0
-
-# ---------------- 音量加减按键配置 (严格匹配原理图) ----------------
-VOL_UP_PIN = 40    # IO40 VOL+
-VOL_DOWN_PIN = 39  # IO39 VOL-
+BOOT_PIN = 0      # ESP32-S3 板载 Boot 键 GPIO0
+VOL_UP_PIN = 40   # IO40 VOL+
+VOL_DOWN_PIN = 39 # IO39 VOL-
 
 button = Pin(BOOT_PIN, Pin.IN, Pin.PULL_UP)
+btn_vol_up = Pin(VOL_UP_PIN, Pin.IN, Pin.PULL_UP)
+btn_vol_down = Pin(VOL_DOWN_PIN, Pin.IN, Pin.PULL_UP)
 
-# 初始化录音模块
-recorder = AudioRecorder(
-    sck_pin=I2S_SCK, ws_pin=I2S_WS, sd_pin=I2S_SD, sample_rate=16000
-)
-
-# 初始化音频播放器对象 (对接 MAX98357 引脚及按键)
+recorder = AudioRecorder(sck_pin=5, ws_pin=4, sd_pin=6, sample_rate=8000)
 player = AudioPlayer(
-    sck_pin=15,          # IO15_BCLK
-    ws_pin=16,           # IO16_LRC
-    sd_pin=7,            # IO7_DIN
+    sck_pin=15,
+    ws_pin=16,
+    sd_pin=7,
     vol_up_pin=VOL_UP_PIN,
     vol_down_pin=VOL_DOWN_PIN,
     init_vol=0.4,
 )
 
-#ui = UIManager()  # 一键完成 SPI、ST7789 屏幕和 uFont 字库初始化
+def refresh_ui(title, content="", color=0xFFFF):
+    ui.render(title, content, color)
 
-# 设置 UI 刷新全局回调函数 (适配 wifi_manager 内部调用)
-#def refresh_ui(title, content="", color=0xFFFF):
-    #ui.render(title, content, color)
+# ==========================================
+# 开机网络健康度诊断 (真实上传测速)
+# ==========================================
+def test_wifi_on_startup(ui_callback):
+    import gc
+    import usocket as socket
+    try:
+        import ssl
+    except ImportError:
+        import ussl as ssl
+
+    ui_callback("网络测速", "正在测试云端上传网速...", color=0xFFE0)
+
+    HOST = "api.siliconflow.cn"
+    data_size = 32 * 1024  # 32KB 测试数据
+    s = None
+
+    try:
+        t0 = time.ticks_ms()
+        addr = socket.getaddrinfo(HOST, 443)[0][-1]
+
+        raw_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        raw_sock.settimeout(10.0)
+        raw_sock.connect(addr)
+
+        if hasattr(ssl, "wrap_socket"):
+            s = ssl.wrap_socket(raw_sock, server_hostname=HOST)
+        else:
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            ctx.verify_mode = ssl.CERT_NONE
+            s = ctx.wrap_socket(raw_sock, server_hostname=HOST)
+
+        s.write(
+            f"POST /v1/audio/transcriptions HTTP/1.1\r\nHost: {HOST}\r\nContent-Length: {data_size}\r\nConnection: close\r\n\r\n".encode()
+        )
+
+        buf = b"A" * 2048
+        sent = 0
+        while sent < data_size:
+            s.write(buf)
+            sent += len(buf)
+
+        t_used = time.ticks_diff(time.ticks_ms(), t0) / 1000.0
+        speed = (data_size / 1024.0) / t_used if t_used > 0 else 0
+
+        print(f"📊 开机测速完成：上传速度 {speed:.1f} KB/s，耗时 {t_used:.2f}s")
+
+        if speed < 6.0:
+            return False, f"上传网速极慢! ({speed:.1f}KB/s)\n语音上传容易超时！"
+        else:
+            return True, f"网速正常 ({speed:.1f}KB/s)"
+
+    except Exception as e:
+        print(f"测速失败: {e}")
+        return False, f"云端测速超时！\n上传网络极差或防火墙拦截"
+    finally:
+        if s:
+            try:
+                s.close()
+            except:
+                pass
+        gc.collect()
 
 # ==========================================
 # 2. 网络初始化
 # ==========================================
-#refresh_ui("网络连接", "正在连接 Wi-Fi，请稍候...", color=0xFFFF)
-
 ssid, pwd = load_wifi_config()
 connect_ok = False
 current_ip = None
 
 if ssid and pwd:
-    print("正在连接无线网络...")
-    connect_ok, current_ip = connect_router_wifi(ssid, pwd)
+    print(f"正在连接无线网络: {ssid}...")
+    try:
+        connect_ok, current_ip = connect_router_wifi(ssid, pwd, refresh_ui)
+    except Exception as e:
+        print(f"❌ Wi-Fi 连接过程异常: {e}")
+        refresh_ui("配网模式", "WiFi连接失败，请用手机连接热点配网", color=0xF800)
 
 if not connect_ok:
     print("WiFi 连接失败，启动配网模式...")
-    #refresh_ui("配网模式", "WiFi连接失败，请用手机连接热点配网", color=0xF800)
-    start_ap_web_server()
+    refresh_ui("配网模式", "WiFi连接失败，请用手机连接热点配网", color=0xF800)
+    start_ap_web_server(refresh_ui)
+else:
+    try:
+        wlan = network.WLAN(network.STA_IF)
+        if hasattr(network.WLAN, "PM_NONE"):
+            wlan.config(pm=network.WLAN.PM_NONE)
+    except Exception as e:
+        print(f"⚠️ Wi-Fi 省电模式设置跳过: {e}")
+        
+    print("🔍 正在诊断网络真实上传速度...")
+    is_net_ok, net_msg = test_wifi_on_startup(refresh_ui)
+    
+    if not is_net_ok:
+        print(f"⚠️ 警告！网络诊断不合格: {net_msg}")
+        refresh_ui("⚠️ 网络上传差", net_msg, color=0xF800)
+        time.sleep(4)
+    else:
+        print(f"✅ 网络诊断通过: {net_msg}")
 
 wifi_online_last = False
-#refresh_ui("AI 语音助手", "系统已就绪！长按 Boot 键开始说话", color=0x07E0)
+refresh_ui("AI 语音助手", "系统已就绪！\n长按 Boot 键开始说话", color=0x07E0)
 
 print("\n==================================")
 print("👉 系统就绪！长按 Boot 键(GPIO0)说话")
+print("🔊 VOL+(IO40) / VOL-(IO39) 调节音量")
 print("==================================\n")
+
+is_processing = False
 
 # ==========================================
 # 3. 业务主循环
 # ==========================================
 while True:
-    online = is_sta_connected()
+    try:
+        gc.collect()
+        online = is_sta_connected()
 
-    # 网络状态变化监测
-    if online != wifi_online_last:
-        if online:
-            print(f"✅ 网络已连接, IP 地址: {current_ip}")
-            #refresh_ui("网络已连接", f"IP: {current_ip}\n系统就绪，长按 Boot 键说话！", color=0x07E0)
-        else:
-            print("⚠️ 网络连接中断！")
-            #refresh_ui("网络中断", "WiFi 连接已断开，请检查网络设置", color=0xF800)
-        wifi_online_last = online
-
-    # 监测录音按键
-    if button.value() == 0:
-        time.sleep_ms(20)  # 消抖
-        if button.value() == 0:
-
-            # 步骤 1：录音
-            print("\n🎙️ 听到按键，开始录音...")
-            #refresh_ui("正在倾听", "正在录音中，松开或结束说话...", color=0x07FF)
-            recorder.record_to_wav("record.wav", button)
-
-            if not is_sta_connected():
-                print("❌ 网络断开，无法上传音频！")
-                #refresh_ui("网络错误", "网络连接中断，无法上传音频！", color=0xF800)
-                continue
-
-            # 步骤 2：语音识别 (ASR)
-            print("🔍 正在识别语音...")
-            #refresh_ui("语音识别", "正在识别您的语音内容...", color=0xFFE0)
-            user_text = transcribe_wav("record.wav")
-            print(f"🗣️ 用户说: {user_text}")
-
-            # 步骤 3：AI 思考与回答
-            if user_text and not user_text.startswith("Error"):
-                #refresh_ui("AI 思考中", f"我：{user_text}\n\nAI 正在思考回答...", color=0xFFE0)
-                print("🤖 正在请求 AI 大模型...")
-                ai_reply = chat_ask(user_text)
-                print(f"💡 AI 回答: {ai_reply}")
-
-                # 屏幕渲染 AI 文字
-                #refresh_ui("AI 回复", ai_reply, color=0xFFFF)
-
-                # 步骤 4：文本转语音 (TTS)
-                if ai_reply:
-                    tts_success = text_to_speech(ai_reply, filename="tts_output.wav")
-
-                    # 步骤 5：音频播放 (支持播放中按键实时调音量)
-                    if tts_success:
-                        print("🔊 正在播放语音回答...")
-                        player.play_wav("tts_output.wav")
-
+        if online != wifi_online_last:
+            if online:
+                print(f"✅ 网络已连接, IP 地址: {current_ip}")
+                refresh_ui("网络已连接", f"IP: {current_ip}\n系统就绪，长按 Boot 键说话！", color=0x07E0)
             else:
-                #refresh_ui("识别失败", "没有听清您说的话，请重试", color=0xF800)
-                time.sleep(1.5)
+                print("⚠️ 网络连接中断！")
+                refresh_ui("网络中断", "WiFi 连接已断开，请检查网络设置", color=0xF800)
+            wifi_online_last = online
 
-            # 恢复待机
-            #refresh_ui("AI 语音助手", "待机中，长按 Boot 键开始下一次对话", color=0x07E0)
-            print("\n----------------------------------")
-            print("👉 等待下一次按键对话...")
+        # 监测按键音量
+        if not is_processing and btn_vol_up.value() == 0:
+            time.sleep_ms(20)
+            if btn_vol_up.value() == 0:
+                player.volume_up()
+                while btn_vol_up.value() == 0:
+                    time.sleep_ms(20)
+
+        if not is_processing and btn_vol_down.value() == 0:
+            time.sleep_ms(20)
+            if btn_vol_down.value() == 0:
+                player.volume_down()
+                while btn_vol_down.value() == 0:
+                    time.sleep_ms(20)
+
+        # 监测 Boot 录音按键
+        if not is_processing and button.value() == 0:
+            time.sleep_ms(20)
+            if button.value() == 0:
+                is_processing = True
+
+                try:
+                    refresh_ui("准备录音", "麦克风就绪，请按住说话...", color=0xFFE0)
+                    time.sleep_ms(300)
+
+                    refresh_ui("正在倾听", "请说话... (松开按键结束)", color=0x07FF)
+
+                    print("\n🎙️ 听到按键，开始录音...")
+                    recorder.record_to_wav("record.wav", button, max_seconds=15)
+
+                    if not is_sta_connected():
+                        print("❌ 网络断开，无法上传音频！")
+                        refresh_ui("网络错误", "网络连接中断，无法上传音频！", color=0xF800)
+                        continue
+
+                    print("🔍 正在识别语音...")
+                    refresh_ui("语音识别", "正在上传音频并识别...", color=0xFFE0)
+                    user_text = transcribe_wav("record.wav")
+                    print(f"🗣️ 用户说: {user_text}")
+
+                    if user_text and not str(user_text).startswith("Error"):
+                        refresh_ui("AI 思考中", f"我：{user_text}\n\nAI 正在思考回答...", color=0xFFE0)
+                        print("🤖 正在请求 AI 大模型...")
+                        ai_reply = chat_ask(user_text)
+                        print(f"💡 AI 回答: {ai_reply}")
+
+                        refresh_ui("AI 回复", ai_reply, color=0xFFFF)
+
+                        if ai_reply and not ai_reply.startswith("HTTP") and not ai_reply.startswith("Error"):
+                            tts_success = text_to_speech(ai_reply, filename="tts_output.wav")
+                            if tts_success:
+                                print("🔊 正在播放语音回答...")
+                                player.play_wav("tts_output.wav")
+                        else:
+                            print("⚠️ AI 返回异常文本，跳过 TTS 播报")
+                    else:
+                        err_str = str(user_text)
+                        if "ETIMEDOUT" in err_str or "116" in err_str or "timeout" in err_str.lower():
+                            print("⚠️ 上传超时！请检查网络状态或缩短说话时长")
+                            refresh_ui("上传超时", "网络传输超时！\n1. 请检查Wi-Fi上传网速\n2. 尝试缩短说话时间", color=0xF800)
+                        else:
+                            print("⚠️ 没有听清或识别失败，请重试")
+                            refresh_ui("识别失败", "没有听清您说的话，请重试", color=0xF800)
+                        time.sleep(2)
+
+                except Exception as req_err:
+                    print(f"💥 业务交互流程发生捕获异常: {req_err}")
+                    refresh_ui("发生异常", f"系统处理异常：{req_err}", color=0xF800)
+                    time.sleep(1.5)
+
+                finally:
+                    try:
+                        recorder.close()
+                    except:
+                        pass
+                    is_processing = False
+                    gc.collect()
+                    refresh_ui("AI 语音助手", "待机中，长按 Boot 键开始下一次对话", color=0x07E0)
+                    print("\n----------------------------------")
+                    print("👉 等待下一次按键对话...")
+
+    except Exception as main_err:
+        print(f"🚨 主循环异常捕获: {main_err}")
+        is_processing = False
+        time.sleep(1)
 
     time.sleep(0.05)
