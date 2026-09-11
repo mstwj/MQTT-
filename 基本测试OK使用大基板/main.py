@@ -1,10 +1,28 @@
-# main.py - AI 语音助手 + AI 画图双功能整合版
+# main.py - AI 语音助手 + AI 画图（生产修复与优化版）
 
 import gc
 import time
 from machine import Pin
 import network
 import usocket as socket
+
+try:
+    import urequests
+except ImportError:
+    import requests as urequests
+
+# 简单的 MicroPython URL 编码函数（支持中文和特殊字符）
+def urlencode(str_val):
+    result = ""
+    for c in str_val:
+        # 保留字母、数字及常见安全字符
+        if (('a' <= c <= 'z') or ('A' <= c <= 'Z') or ('0' <= c <= '9') or c in '_.-~'):
+            result += c
+        else:
+            # 转换为 UTF-8 字节并做百分号编码
+            for b in c.encode('utf-8'):
+                result += f"%{b:02X}"
+    return result
 
 # 脱机上电硬件救急：强行拉高背光和 CS 引脚
 try:
@@ -20,7 +38,6 @@ from display_ui import UIManager  # 导入 UI 模块
 ui = UIManager()
 ui.render(title="系统启动中", content="正在初始化硬件与网络...", color=0xFFFF)
 
-from ai_bmp_client import AIBMPClient  # 导入 AI 画图模块
 from ai_client import chat_ask
 from asr_client import transcribe_wav
 from audio_play import AudioPlayer
@@ -36,9 +53,9 @@ from wifi_manager import (
 # ==========================================
 # 1. 初始化 硬件、UI 与 全局对象
 # ==========================================
-BOOT_PIN = 0  # ESP32-S3 板载 Boot 键 GPIO0 (语音对话)
+BOOT_PIN = 0     # ESP32-S3 板载 Boot 键 GPIO0 (语音对话)
 VOL_UP_PIN = 40  # IO40 VOL+ (音量增加)
-IMG_BTN_PIN = 39  # IO39 按键 (按住说话生成 AI 图片)
+IMG_BTN_PIN = 39 # IO39 按键 (按住说话生成 AI 图片)
 
 button = Pin(BOOT_PIN, Pin.IN, Pin.PULL_UP)
 btn_vol_up = Pin(VOL_UP_PIN, Pin.IN, Pin.PULL_UP)
@@ -50,12 +67,9 @@ player = AudioPlayer(
     ws_pin=16,
     sd_pin=7,
     vol_up_pin=VOL_UP_PIN,
-    vol_down_pin=39,  # 仅保留引脚定义，不再用于减音量
+    vol_down_pin=39,
     init_vol=0.4,
 )
-
-# 初始化画图客户端 (硅基流动 API)
-image_gen = AIBMPClient()
 
 
 def refresh_ui(title, content="", color=0xFFFF):
@@ -67,8 +81,6 @@ def refresh_ui(title, content="", color=0xFFFF):
 # ==========================================
 def test_wifi_on_startup(ui_callback):
     import gc
-    import usocket as socket
-
     try:
         import ssl
     except ImportError:
@@ -108,15 +120,10 @@ def test_wifi_on_startup(ui_callback):
         t_used = time.ticks_diff(time.ticks_ms(), t0) / 1000.0
         speed = (data_size / 1024.0) / t_used if t_used > 0 else 0
 
-        print(
-            f"📊 开机测速完成：上传速度 {speed:.1f} KB/s，耗时 {t_used:.2f}s"
-        )
+        print(f"📊 开机测速完成：上传速度 {speed:.1f} KB/s，耗时 {t_used:.2f}s")
 
         if speed < 6.0:
-            return (
-                False,
-                f"上传网速极慢! ({speed:.1f}KB/s)\n语音上传容易超时！",
-            )
+            return False, f"上传网速极慢! ({speed:.1f}KB/s)\n语音上传容易超时！"
         else:
             return True, f"网速正常 ({speed:.1f}KB/s)"
 
@@ -223,11 +230,13 @@ while True:
                 while btn_vol_up.value() == 0:
                     time.sleep_ms(20)
 
-        # 2. 监测 IO39 画图按键
+        # 2. 监测 IO39 画图按键（对接 passnow.tech 接口 - 增加安全闭环与流式下载）
         if not is_processing and btn_img.value() == 0:
             time.sleep_ms(20)
             if btn_img.value() == 0:
                 is_processing = True
+                resp = None
+                img_resp = None
                 try:
                     refresh_ui(
                         "AI 画图模式",
@@ -259,25 +268,44 @@ while True:
                     prompt_text = transcribe_wav("record.wav")
 
                     if prompt_text and not str(prompt_text).startswith("Error"):
-
-                        # 实时状态刷新回调，解决界面卡死假象
-                        def update_status(status_msg):
-                            refresh_ui(
-                                "AI 画图生成中",
-                                f"提示词：{prompt_text}\n\n状态：{status_msg}",
-                                color=0xFFE0,
-                            )
-
-                        # 调用画图模块：完成 AI 生图 -> 内存下载 -> 上传转码 -> 下载 BMP 过程
-                        bmp_file = image_gen.generate_image(
-                            prompt_text,
-                            save_bmp_path="output.bmp",
-                            status_cb=update_status,
+                        refresh_ui(
+                            "AI 画图生成中",
+                            f"提示词：{prompt_text}\n\n状态：正在请求后端生成...",
+                            color=0xFFE0,
                         )
+
+                        # 对中文提示词进行安全 URL 编码
+                        encoded_prompt = urlencode(prompt_text)
+                        api_url = f"https://www.passnow.tech/generate_bmp.php?prompt={encoded_prompt}"
+                        print(f"🎨 正在请求生图 API: {api_url}")
+                        
+                        resp = urequests.get(api_url)
+                        data = resp.json()
+                        img_url = data.get("url")
+                        
+                        if not img_url:
+                            raise Exception("后端未返回有效的图片下载链接")
+
+                        refresh_ui(
+                            "AI 画图生成中",
+                            f"提示词：{prompt_text}\n\n状态：正在下载图像...",
+                            color=0xFFE0,
+                        )
+                        print(f"📥 正在从链接下载图片: {img_url}")
+                        
+                        # 使用流式分块写入文件，避免大文件一次性爆内存
+                        img_resp = urequests.get(img_url)
+                        bmp_path = "output.bmp"
+                        with open(bmp_path, "wb") as f:
+                            while True:
+                                chunk = img_resp.raw.read(512)
+                                if not chunk:
+                                    break
+                                f.write(chunk)
 
                         # 刷屏显示 BMP 图像
                         print("🖼️ 正在刷新屏幕显示 BMP 图片...")
-                        ui.lcd.draw_bmp(bmp_file, start_x=0, start_y=0)
+                        ui.lcd.draw_bmp(bmp_path, start_x=0, start_y=0)
                         ui.lcd.show()
                         print("✨ 图片渲染完成！")
 
@@ -298,6 +326,14 @@ while True:
                     time.sleep(2)
 
                 finally:
+                    # 确保无论成败都关闭 HTTP 连接，防止 Socket 泄漏
+                    if img_resp:
+                        try: img_resp.close()
+                        except: pass
+                    if resp:
+                        try: resp.close()
+                        except: pass
+
                     try:
                         recorder.close()
                     except:
