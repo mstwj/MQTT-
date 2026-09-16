@@ -1,0 +1,55 @@
+name: Build Frozen MicroPython Firmware
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libffi-dev git pkg-config python3 python3-pip python3-venv
+
+    - name: Set up ESP-IDF
+      run: |
+        git clone --recursive -b v5.0.2 https://github.com/espressif/esp-idf.git
+        cd esp-idf
+        ./install.sh esp32s3
+        
+    - name: Checkout MicroPython
+      run: |
+        git clone --recursive https://github.com/micropython/micropython.git
+        cd micropython
+        make -C mpy-cross
+
+    - name: Copy Modules for Freezing
+      run: |
+        # 建立冻结目录并将仓库中的 modules 放入
+        mkdir -p micropython/ports/esp32/modules
+        if [ -d "modules" ]; then
+          cp -r modules/* micropython/ports/esp32/modules/
+        else
+          cp *.py micropython/ports/esp32/modules/
+        fi
+
+    - name: Build Firmware for N16R8 (ESP32-S3)
+      run: |
+        source esp-idf/export.sh
+        cd micropython/ports/esp32
+        make submodules
+        # 编译适配 ESP32-S3 (16MB Flash, 8MB PSRAM)
+        make BOARD=ESP32_GENERIC_S3 BOARD_VARIANT=SPIRAM_OCT
+
+    - name: Upload Firmware Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: esp32s3-frozen-firmware
+        path: micropython/ports/esp32/build-ESP32_GENERIC_S3-SPIRAM_OCT/firmware.bin
