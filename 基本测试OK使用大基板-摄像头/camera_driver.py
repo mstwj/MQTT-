@@ -21,7 +21,7 @@ CAM_PINS = dict(
     pwdn=-1,
     reset=-1,
     xclk=15,
-    pclk=13,
+    pclk=13,    
 )
 
 
@@ -41,7 +41,14 @@ class CameraController:
             camera.init(0, **CAM_PINS)
             self.is_active = True
             print("🎉 摄像头初始化成功！")
+            
+            # 1. 设置垂直翻转 (0: 正常, 1: 翻转)
+            camera.flip(1)
+            # 2. 设置水平镜像 (0: 正常, 1: 镜像)
+            camera.mirror(0)
+            
             return True
+        
         except Exception as e:
             self.is_active = False
             print(f"❌ 摄像头初始化失败: {e}")
