@@ -41,12 +41,27 @@ time.sleep(2)
 
 
 # 方案 A：全屏清屏后只画 JPG 图片
+
 ui.lcd.fill(BLACK)
 ui.lcd.draw_bmp("photo.bmp", start_x=0, start_y=0)
-ui.lcd.show()
+#ui.lcd.show()
+
+
 
 time.sleep(3)
 
+ui.lcd.draw_bmp("result.bmp", start_x=0, start_y=0)
+#ui.lcd.show()
+
+time.sleep(3)
+
+'''
+
+ui.lcd.display_ai_bmp()
+ui.lcd.show()
+
+time.sleep(3)
+'''
 print("=== 所有功能测试完成 ===")
 
 
